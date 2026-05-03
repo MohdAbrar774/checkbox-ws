@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>1 Million Checkboxes</title>
+
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+      }
+
+      body {
+        background: #0f172a;
+        color: #e2e8f0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        min-height: 100vh;
+        padding: 40px 20px;
+      }
+
+      h1 {
+        margin-bottom: 20px;
+        font-size: 2rem;
+        letter-spacing: 1px;
+      }
+
+      #container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(30px, 1fr));
+        gap: 12px;
+        width: 100%;
+        max-width: 600px;
+        background: #1e293b;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      }
+
+      input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        accent-color: #22c55e;
+        cursor: pointer;
+        transform: scale(1);
+        transition:
+          transform 0.15s ease,
+          box-shadow 0.15s ease;
+      }
+
+      input[type="checkbox"]:hover {
+        transform: scale(1.2);
+        box-shadow: 0 0 6px #22c55e;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>1 Million Checkboxes</h1>
+
+    <div id="container"></div>
+    <div id="error-banner" style="display:none; margin-top:20px; padding:12px 16px; border-radius:10px; background:#fecaca; color:#7f1d1d; font-weight:600;"></div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io();
+      const container = document.getElementById("container");
+      const errorBanner = document.getElementById("error-banner");
+      const CHECK_COUNT = 100;
+
+      socket.on('server:error', (data) => {
+        const errorMessage = data.error || 'An unknown error occurred.';
+        errorBanner.textContent = errorMessage;
+        errorBanner.style.display = 'block';
+      });
+      socket.on("server:checkbox:change", (data) => {
+        console.log(`Socket Server Event`, data);
+        const { index, checked } = data;
+
+        const input = document.getElementById(`checkbox-${index}`);
+        if (input) {
+          input.checked = checked;
+        }
+      });
+
+      //whenever the browser window load it fetch the data from the memory and restore it
+      //  and listen the changes on checkboxes
+      
+      async function fetchStateFromServer(){
+
+        while(container.firstChild()){
+          container.removeChild(container.firstChild);
+        }
+
+        
+
+        const response = await fetch("checkboxes", { method: "GET" });
+        const data = await response.json(); 
+
+        if (data && data.checkboxes) {
+          data.checkboxes.forEach((serverValue, index) => {
+            const input = document.createElement("input");
+            input.type = "checkbox";
+            input.id = `checkbox-${index}`;
+            //Instead of  maintaining in memory state we fetched ot from the server side (we changed our source of truth from frontend to backned server )
+            input.checked = serverValue;
+
+            input.addEventListener("change", (event) => {
+              const checked = event.target.checked;
+              console.log("Chechbox Changed", { index, checked });
+              socket.emit("client:checkbox:change", { index, checked });
+              fetchStateFromServer();
+            });
+            container.appendChild(input);
+          });
+        } 
+      }
+  
+      window.addEventListener("load", async () => {
+       fetchStateFromServer()
+      });
+    </script>
+  </body>
+</html>
