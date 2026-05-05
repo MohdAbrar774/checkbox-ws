@@ -9,7 +9,8 @@ import { Server, Socket } from 'socket.io'
 import { publisher, subscriber, redis } from './redis-connection.js'
 import { channel, subscribe } from 'node:diagnostics_channel';
 
-const CHECKBOX_SIZE = 100;
+const RATE_LIMIT_WINDOW = Number(process.env.RATE_LIMIT_WINDOW_MS) || 5000;
+const CHECKBOX_SIZE = Number(process.env.CHECK_COUNT) || 100000;
 const CHECKBOX_STATE_KEY = 'checkbox-state-v1';
 
 
@@ -48,7 +49,7 @@ async function main() {
                 const lastOperationTime = await redis.get(`rate:limiting:${socket.id}`)
                 if(lastOperationTime){
                 const timeElapsed = Date.now() - lastOperationTime;
-                 if(timeElapsed < 5.5 * 1000){
+                 if(timeElapsed < RATE_LIMIT_WINDOW){
                     socket.emit('server:error',{error:`Please wait`});
                     return
                  }

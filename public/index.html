@@ -71,7 +71,7 @@
       const socket = io();
       const container = document.getElementById("container");
       const errorBanner = document.getElementById("error-banner");
-      const CHECK_COUNT = 100;
+     const CHECK_COUNT = 1000000;
 
       socket.on('server:error', (data) => {
         const errorMessage = data.error || 'An unknown error occurred.';
@@ -93,9 +93,9 @@
       
       async function fetchStateFromServer(){
 
-        while(container.firstChild()){
-          container.removeChild(container.firstChild);
-        }
+        while (container.firstChild) {
+  container.removeChild(container.firstChild);
+}
 
         
 
@@ -115,6 +115,7 @@
               console.log("Chechbox Changed", { index, checked });
               socket.emit("client:checkbox:change", { index, checked });
               fetchStateFromServer();
+              //container.innerHTML = "";
             });
             container.appendChild(input);
           });
