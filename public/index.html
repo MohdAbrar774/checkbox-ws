@@ -71,7 +71,7 @@
       const socket = io();
       const container = document.getElementById("container");
       const errorBanner = document.getElementById("error-banner");
-     const CHECK_COUNT = 1000000;
+     const CHECK_COUNT = 500;
 
       socket.on('server:error', (data) => {
         const errorMessage = data.error || 'An unknown error occurred.';
