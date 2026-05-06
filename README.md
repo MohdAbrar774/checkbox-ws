@@ -22,6 +22,13 @@ When a checkbox is updated:
 3. State is updated in Redis
 4. Update is broadcast to all clients (via Pub/Sub)
 
+
+## 🎥 Project Walkthrough
+
+A complete walkthrough of the project architecture, real-time communication flow, Redis integration, rate limiting logic, and deployment process is available here:
+
+🔗 YouTube Walkthrough: [Watch the Video](https://youtu.be/XGlb93NXiFI)
+
 ---
 
 ## ⚙️ Tech Stack
